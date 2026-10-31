@@ -304,7 +304,7 @@ window.FIREBASE_CONFIG = {
 </head><body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><h1 id="brandTitle">Highway Horde</h1><span>Six lanes · endless zombies</span></div>
+    <div class="brand"><h1 id="brandTitle">Highway Horde</h1><span>Endless zombies · pick your powers</span></div>
     <div class="purse">
       <div class="chip" title="Coins to spend"><span class="coin-ic"></span><span id="hudCoins">0</span><small>coins</small></div>
       <div class="chip" title="Heroes unlocked"><span id="hudOwned">2</span><small id="hudTotal">/ 45 heroes</small></div>
@@ -389,7 +389,7 @@ window.FIREBASE_CONFIG = {
 
     <section class="panel" aria-labelledby="oddsH">
       <h2 id="oddsH">Rarity &amp; drop odds</h2>
-      <p class="sub">Every hero starts each run with their own powers, and better heroes start with more. Rare and up shoot their own kind of bullets. Mythic heroes fight on their own roads. The Secret hero only comes from taking down the Golden Zombie.</p>
+      <p class="sub">Every hero starts each run with their own powers, and better heroes start with more. Rare and up shoot their own kind of bullets. Mythic heroes fight in their own worlds. The Secret hero only comes from taking down the Golden Zombie.</p>
       <div class="tablewrap">
         <table class="odds">
           <thead><tr><th>Rarity</th><th>Heroes</th><th>Basic chest</th><th>Epic chest</th><th>Dupe refund</th><th>Found</th></tr></thead>
@@ -546,8 +546,8 @@ const isCreator = c => c.name === "THE CREATOR";
 const tierCounts = TIERS.map((_, i) => CHARS.filter(c => c.tier === i).length);
 const BULLET_NAME = {"":"Standard bullets", fire:"Fire bullets", ice:"Ice bullets", heart:"Heart bullets", star:"Star bullets", rainbow:"Rainbow bullets", bolt:"Lightning bullets", gold:"Gold bullets", bubble:"Bubble bullets", plasma:"Plasma bullets", neon:"Neon bullets", candy:"Candy bullets", laser:"Laser bullets", ghost:"Ghost bullets"};
 const startText = c => c.start.map(k => ABILITIES[k].name).join(", ");
-// the Mythic and Secret heroes fight on their own roads
-const THEMES = {"Zombie King":{world:"Graveyard Road"}, "Starship Captain":{world:"Moon Base Highway"}, "THE CREATOR":{world:"Golden Skyway"}, "Golden Gunner":{world:"Gold Rush Road"}};
+// the Mythic and Secret heroes fight in their own worlds
+const THEMES = {"Zombie King":{world:"Graveyard"}, "Starship Captain":{world:"Moon Base"}, "THE CREATOR":{world:"Golden Palace"}, "Golden Gunner":{world:"Gold Rush Town"}};
 const themeFor = c => THEMES[c.name] || null;
 
 function hexRGB(h){h=h.replace("#","");return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
@@ -908,11 +908,9 @@ const Sound = (() => {
   const fx = {
     // a run starts: a shotgun pump
     start(){ if (!ok()) return; noise(.06, {vol:.3, hp:800, lp:4000}); noise(.08, {vol:.3, at:.14, hp:600, lp:3000}); tone(180, .08, {type:"square", vol:.06, at:.14, cutoff:1200}); },
-    // your gun: a soft little pew (the gun fires a lot, so it's quiet)
-    shoot(){ if (!ok() || !lim("shoot", .06)) return; tone(900 + Math.random()*120, .05, {type:"square", vol:.035, slide:380, cutoff:2600}); noise(.025, {vol:.04, hp:2000}); },
-    hit(){ if (!ok() || !lim("hit", .05)) return; noise(.03, {vol:.07, lp:900}); },
+    hit(){ if (!ok() || !lim("hit", .14)) return; noise(.03, {vol:.07, lp:900}); },
     // a zombie goes down: a squishy splat
-    kill(){ if (!ok() || !lim("kill", .045)) return; noise(.09, {vol:.14, lp:700}); tone(160 + Math.random()*40, .1, {type:"sine", vol:.12, slide:70}); },
+    kill(){ if (!ok() || !lim("kill", .08)) return; noise(.09, {vol:.14, lp:700}); tone(160 + Math.random()*40, .1, {type:"sine", vol:.12, slide:70}); },
     // a diamond: a tiny bubble pop
     gem(){ if (!ok() || !lim("gem", .03)) return; tone(700 + Math.random()*200, .05, {type:"sine", vol:.07, slide:1600, attack:.002}); },
     coin(){ if (!ok()) return; tone(1200, .06, {type:"triangle", vol:.08}); tone(1600, .09, {type:"triangle", vol:.08, at:.05}); },
@@ -1075,7 +1073,7 @@ function openChest(kind){
   later(fx.dur, () => {
     $("cfTier").textContent = t.name; $("cfTier").style.color = t.color;
     $("cfName").textContent = c.name; $("cfName").style.color = c.tier >= 3 ? t.color : "var(--ink)"; $("cfName").classList.toggle("creator", isCreator(c));
-    $("cfNote").textContent = (themeFor(c) ? `Fights on the ${themeFor(c).world} · ` : "") + "Starts with " + startText(c) + " · " + (isNew ? `New hero! ${carNo(c)} of ${CHARS.length}` : `You already had this one · +${t.refund} coins back`);
+    $("cfNote").textContent = (themeFor(c) ? `Fights in the ${themeFor(c).world} · ` : "") + "Starts with " + startText(c) + " · " + (isNew ? `New hero! ${carNo(c)} of ${CHARS.length}` : `You already had this one · +${t.refund} coins back`);
     el.classList.remove("shaking","dim"); el.classList.add("revealed"); cfRevealed = true; Sound.reveal(c.tier);
     if (c.tier >= 4){ el.classList.remove("quake"); void el.offsetWidth; el.classList.add("quake"); }
     if (c.tier >= 5) $("cfTier").textContent = "Mythic!";
@@ -1178,7 +1176,7 @@ function resetRun(){
     px:laneX(2.5), tx:laneX(2.5), py:HOME_Y, ty:HOME_Y, vx:0, vy:0, walk:0, level:1, xp:0, ab, choices:null, pickT:0,
     zs:[], bullets:[], gems:[], drops:[], parts:[], trail:[], fx:[], texts:[], goo:[], flames:[],
     fireT:.3, rearT:.5, sideT:.5, grenT:2, rockT:1.5, zapT:1.5, flameT:0, bladeA:0, spawnT:1.2, hordeT:16, hordeWarn:null,
-    banner:{text:"Wave 1", sub: themeFor(c) ? themeFor(c).world : (TEST.on ? "Test mode" : "Here they come!"), t:1.8}, paused:false, bossOn:false, goldSpawned:false, goldGot:false, newBest:false});
+    banner:{text:"Wave 1", sub: themeFor(c) ? themeFor(c).world : worldFor(1).name + (TEST.on ? " · Test mode" : " · Here they come!"), t:1.8}, paused:false, bossOn:false, goldSpawned:false, goldGot:false, newBest:false});
 }
 function startRun(){
   resetRun(); game.state = "running";
@@ -1241,7 +1239,7 @@ function spawnTick(dt){
 function nextWave(){
   game.wave++; game.waveT = 0; const bonus = (game.wave - 1)*2; addCoins(bonus);
   if (game.wave % 5 === 0){ spawnZ("boss", laneX(2.5), -40); game.bossOn = true; game.banner = {text:"BOSS: THE TANK", sub:"Wave " + game.wave + " · +" + bonus + " coins", t:2.2}; Sound.boss(); }
-  else { game.banner = {text:"Wave " + game.wave, sub:"+" + bonus + " coin wave bonus · more zombies", t:1.8}; Sound.wave(); }
+  else { game.banner = {text:"Wave " + game.wave, sub: (themeFor(curCar()) ? "" : worldFor(game.wave).name + " · ") + "+" + bonus + " coins", t:1.8}; Sound.wave(); }
   Saves.save();
 }
 
@@ -1309,7 +1307,6 @@ function fireGuns(dt){
     for (let i = 0; i < n; i++) shoot(mx - (n - 1)*3.5 + i*7, my, 0, -V);
     const sp = [[], [10], [8, 18], [7, 14, 22]][lv("spread")];
     sp.forEach(a => { const r = a*Math.PI/180; shoot(mx, my, Math.sin(r)*V, -Math.cos(r)*V, .8); shoot(mx, my, -Math.sin(r)*V, -Math.cos(r)*V, .8); });
-    Sound.shoot();
   }
   if (lv("rear")){ game.rearT -= dt; if (game.rearT <= 0){ game.rearT += base*(2 - .35*lv("rear")); shoot(mx, game.py - 6, 0, V, .8); } }
   if (lv("side")){ game.sideT -= dt; if (game.sideT <= 0){ game.sideT += base*(2 - .35*lv("side")); shoot(mx - 8, game.py - 16, -V, 0, .8); shoot(mx + 8, game.py - 16, V, 0, .8); } }
@@ -1494,59 +1491,83 @@ function lanes(line, edge, dash){
   for (let i = 1; i < LANES; i++){ const x = ROAD_X + i*LANE_W - 1; const off = game.scroll % 48; for (let y = -48 + off; y < GH; y += 48) { ctx.fillStyle = line; ctx.fillRect(x, y, 2, dash || 20); } }
   ctx.fillStyle = edge; ctx.fillRect(ROAD_X + 3, 0, 3, GH); ctx.fillRect(ROAD_X + ROAD_W - 6, 0, 3, GH);
 }
-const WAVE_LAND = [{g:"#4e6a3a", t:"#3a5230", r:"#44474f"}, {g:"#6a6238", t:"#7a4a26", r:"#46454a"}, {g:"#3a4a4a", t:"#2a3a3a", r:"#3a3d46"}, {g:"#5a5a6a", t:"#3a3a4a", r:"#3e3f48"}, {g:"#6a5a42", t:"#4a3a2a", r:"#47423e"}];
-function wreck(x, y, h){ // an abandoned car on the shoulder, seen from above
-  ctx.save(); ctx.translate(x, y); ctx.rotate(((h % 40) - 20)/60);
-  const col = ["#6a4a3a","#4a5a6a","#7a6a4a","#5a4a5a","#3a4a3a"][h % 5];
-  ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.fillRect(-9, -15, 20, 32); ctx.fillStyle = col; ctx.fillRect(-10, -16, 20, 32);
-  ctx.fillStyle = "#1c2028"; ctx.fillRect(-7, -9, 14, 5); ctx.fillRect(-7, 6, 14, 4); ctx.fillStyle = shade(col, .12); ctx.fillRect(-7, -4, 14, 10);
-  ctx.restore();
-}
+/* ---------- the battlefields: one changes to the next each wave. The fight happens in the open middle; fences, trees and walls mark the edges. ---------- */
+function edges(seg, draw){ const sc = game.scroll, k0 = Math.floor((sc - GH)/seg) - 1, k1 = Math.floor(sc/seg) + 1;
+  for (let k = k0; k <= k1; k++){ const y = sc - k*seg; draw(ROAD_X - 3, y, hash(k, 3), 0); draw(ROAD_X + ROAD_W + 3, y, hash(k, 4), 1); } }
+function scatter(seg, per, draw, inside){ const sc = game.scroll, k0 = Math.floor((sc - GH)/seg) - 1, k1 = Math.floor(sc/seg) + 1;
+  for (let k = k0; k <= k1; k++) for (let i = 0; i < per; i++){ const h = hash(k, 50 + i), y = sc - k*seg + (h >> 8) % seg;
+    const x = inside ? ROAD_X + 8 + h % (ROAD_W - 16) : (i % 2 ? ROAD_X + ROAD_W + 10 + h % Math.max(1, GW - ROAD_X - ROAD_W - 14) : 4 + h % Math.max(1, ROAD_X - 14));
+    if (!inside && (x < -10 || x > GW + 10 || (i % 2 ? x < ROAD_X + ROAD_W + 8 : x > ROAD_X - 8))) continue; draw(x, y, h); } }
+function field(outCol, inCol){ ctx.fillStyle = outCol; ctx.fillRect(0, 0, GW, GH); ctx.fillStyle = inCol; ctx.fillRect(ROAD_X, 0, ROAD_W, GH); }
+function tree(x, y, h, col){ const r = 9 + h % 8; circ(x + 3, y + 4, r, "rgba(0,0,0,.18)"); circ(x, y, r, col); circ(x - r*.3, y - r*.3, r*.5, shade(col, .14)); }
+const WORLDS = [
+  {name:"Meadow", draw(){
+    field("#3e5a30", "#557340");
+    scatter(70, 2, (x, y, h) => tree(x, y, h, "#2e4a26"));
+    scatter(40, 5, (x, y, h) => { ctx.fillStyle = "rgba(30,50,20,.35)"; ctx.fillRect(x, y, 2, 4); ctx.fillRect(x + 3, y + 1, 2, 3); }, true);
+    scatter(60, 3, (x, y, h) => { ctx.fillStyle = h % 2 ? "rgba(255,255,255,.45)" : "rgba(255,220,90,.45)"; ctx.fillRect(x, y, 2, 2); }, true);
+    edges(28, (x, y) => { ctx.fillStyle = "#6a4a2a"; ctx.fillRect(x - 2, y - 4, 4, 8); });
+    ctx.fillStyle = "#7a5a34"; ctx.fillRect(ROAD_X - 4, 0, 2, GH); ctx.fillRect(ROAD_X + ROAD_W + 2, 0, 2, GH); }},
+  {name:"Forest Trail", draw(){
+    field("#24381f", "#5e5238");
+    ctx.fillStyle = "#4a4a2e"; ctx.fillRect(ROAD_X, 0, 10, GH); ctx.fillRect(ROAD_X + ROAD_W - 10, 0, 10, GH);
+    scatter(50, 4, (x, y, h) => tree(x, y, h, h % 3 ? "#1e3a1c" : "#2a4a22"));
+    scatter(50, 4, (x, y, h) => { ctx.fillStyle = "rgba(40,32,20,.35)"; ctx.beginPath(); ctx.ellipse(x, y, 2 + h % 3, 1.5, 0, 0, Math.PI*2); ctx.fill(); }, true);
+    scatter(220, 1, (x, y, h) => { ctx.fillStyle = "#5a3e24"; ctx.fillRect(x - 12, y - 3, 24, 6); ctx.fillStyle = "#7a5a3a"; ctx.fillRect(x + 10, y - 3, 3, 6); }, true);
+    edges(34, (x, y, h) => { if (h % 2) circ(x, y, 6, "#2a4a22"); }); }},
+  {name:"Farmland", draw(){
+    field("#7a7034", "#7a5e3c");
+    { const off = game.scroll % 1; for (let x = 6; x < ROAD_X - 6; x += 12){ ctx.fillStyle = "#5a7a2a"; ctx.fillRect(x, 0, 6, GH); } for (let x = ROAD_X + ROAD_W + 10; x < GW; x += 12){ ctx.fillStyle = "#5a7a2a"; ctx.fillRect(x, 0, 6, GH); } }
+    for (let x = ROAD_X + 20; x < ROAD_X + ROAD_W - 10; x += 36){ ctx.fillStyle = "rgba(60,40,20,.18)"; ctx.fillRect(x, 0, 3, GH); }
+    scatter(160, 1, (x, y, h) => { ctx.fillStyle = "#d8b85a"; ctx.fillRect(x - 9, y - 6, 18, 12); ctx.fillStyle = "#b8983a"; ctx.fillRect(x - 9, y - 2, 18, 2); });
+    edges(24, (x, y) => { ctx.fillStyle = "#e8e0c8"; ctx.fillRect(x - 2, y - 3, 4, 6); });
+    ctx.fillStyle = "#d8d0b8"; ctx.fillRect(ROAD_X - 4, 0, 2, GH); ctx.fillRect(ROAD_X + ROAD_W + 2, 0, 2, GH); }},
+  {name:"Ghost Town", draw(){
+    field("#3e3832", "#7a6a56");
+    ctx.fillStyle = "rgba(60,48,36,.25)"; ctx.fillRect(ROAD_X + ROAD_W*.3, 0, 5, GH); ctx.fillRect(ROAD_X + ROAD_W*.7, 0, 5, GH);
+    ctx.fillStyle = "#6a5440"; ctx.fillRect(ROAD_X - 14, 0, 14, GH); ctx.fillRect(ROAD_X + ROAD_W, 0, 14, GH);
+    { const off = game.scroll % 10; ctx.fillStyle = "rgba(30,20,14,.35)"; for (let y = -10 + off; y < GH; y += 10){ ctx.fillRect(ROAD_X - 14, y, 14, 1); ctx.fillRect(ROAD_X + ROAD_W, y, 14, 1); } }
+    scatter(90, 2, (x, y, h) => { const w = 30 + h % 20, col = ["#5a3e2e","#4a4a52","#6a4a3a","#3e4a4a"][h % 4]; ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.fillRect(x - w/2 + 3, y - 20, w, 44); ctx.fillStyle = col; ctx.fillRect(x - w/2, y - 22, w, 44); ctx.fillStyle = shade(col, -.25); ctx.fillRect(x - 1, y - 22, 2, 44); });
+    scatter(130, 1, (x, y, h) => { ctx.strokeStyle = "rgba(150,120,70,.5)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI*2); ctx.stroke(); }, true); }},
+  {name:"Swamp", draw(){
+    field("#1e302a", "#4a4a30");
+    scatter(60, 3, (x, y, h) => { circ(x, y, 5 + h % 4, "#3a6a3a"); ctx.fillStyle = "#1e302a"; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, 6 + h % 4, -.3, .3); ctx.fill(); });
+    scatter(50, 3, (x, y, h) => { ctx.fillStyle = "rgba(30,40,24,.35)"; ctx.beginPath(); ctx.ellipse(x, y, 8 + h % 10, 4, 0, 0, Math.PI*2); ctx.fill(); }, true);
+    edges(14, (x, y, h) => { ctx.fillStyle = "#5a6a2a"; ctx.fillRect(x - 1 + (h % 3) - 1, y - 6, 2, 10); if (h % 4 === 0){ ctx.fillStyle = "#6a4a2a"; ctx.fillRect(x - 1.5, y - 8, 3, 4); } }); }},
+];
 const WORLD_DRAW = {
-  highway(){
-    const L = WAVE_LAND[(game.wave - 1 || 0) % WAVE_LAND.length];
-    ctx.fillStyle = L.g; ctx.fillRect(0, 0, GW, GH);
-    roadside(64, (x, y, h) => { const k = h % 7; if (k === 0){ ctx.fillStyle = "#c8601a"; ctx.fillRect(x - 3, y - 6, 6, 9); ctx.fillStyle = "#f4f4f8"; ctx.fillRect(x - 3, y - 3, 6, 2); }
-      else if (k === 1){ ctx.fillStyle = "#5a5e6a"; ctx.fillRect(x - 5, y - 6, 10, 12); ctx.fillStyle = "#3a3e48"; ctx.fillRect(x - 5, y - 2, 10, 2); }
-      else if (k === 2 && x > 18 && x < GW - 18) wreck(x, y, h);
-      else { const r = 6 + h % 7; circ(x + 2, y + 3, r, "rgba(0,0,0,.16)"); circ(x, y, r, L.t); circ(x - r*.3, y - r*.3, r*.5, shade(L.t, .14)); } });
-    ctx.fillStyle = shade(L.r, .2); ctx.fillRect(ROAD_X - 6, 0, ROAD_W + 12, GH);
-    ctx.fillStyle = L.r; ctx.fillRect(ROAD_X, 0, ROAD_W, GH);
-    onRoad(90, (x, y, h) => { ctx.strokeStyle = "rgba(20,20,26,.45)"; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (h % 14) - 7, y + 10); ctx.lineTo(x + (h % 9) - 2, y + 22); ctx.stroke();
-      if (h % 3 === 0){ ctx.fillStyle = "rgba(20,20,26,.22)"; ctx.beginPath(); ctx.ellipse(x + 20, y + 30, 9, 5, 0, 0, Math.PI*2); ctx.fill(); } });
-    lanes("rgba(230,230,220,.45)", "rgba(240,200,80,.55)");
-  },
-  "Graveyard Road"(){
-    ctx.fillStyle = "#1e1a2a"; ctx.fillRect(0, 0, GW, GH);
-    roadside(56, (x, y, h) => { if (h % 3){ ctx.fillStyle = "#6a6e7a"; ctx.beginPath(); ctx.roundRect(x - 6, y - 9, 12, 15, [6, 6, 0, 0]); ctx.fill(); ctx.fillStyle = "#4a4e5a"; ctx.fillRect(x - 3, y - 4, 6, 1.5); ctx.fillRect(x - .75, y - 6, 1.5, 6); } else { ctx.fillStyle = "#3a2a1a"; ctx.fillRect(x - 1, y - 12, 2, 14); ctx.fillRect(x - 6, y - 8, 12, 2); } });
-    ctx.fillStyle = "#3a2e26"; ctx.fillRect(ROAD_X - 6, 0, ROAD_W + 12, GH); ctx.fillStyle = "#4a3c32"; ctx.fillRect(ROAD_X, 0, ROAD_W, GH);
-    onRoad(70, (x, y, h) => { ctx.fillStyle = "rgba(200,190,230,.05)"; ctx.beginPath(); ctx.ellipse(x, y, 40 + h % 30, 12, 0, 0, Math.PI*2); ctx.fill(); });
-    lanes("rgba(190,170,230,.3)", "rgba(150,110,200,.5)");
-  },
-  "Moon Base Highway"(){
-    ctx.fillStyle = "#05040e"; ctx.fillRect(0, 0, GW, GH);
-    roadside(36, (x, y, h) => { ctx.fillStyle = h % 3 ? "rgba(255,255,255,.7)" : "rgba(170,200,255,.8)"; ctx.fillRect(x, y, h % 4 === 0 ? 2 : 1, h % 4 === 0 ? 2 : 1); });
-    ctx.fillStyle = "#5a5e6a"; ctx.fillRect(ROAD_X - 6, 0, ROAD_W + 12, GH); ctx.fillStyle = "#2a2e3a"; ctx.fillRect(ROAD_X, 0, ROAD_W, GH);
-    { const off = game.scroll % 60; ctx.fillStyle = "rgba(255,255,255,.04)"; for (let y = -60 + off; y < GH; y += 60) ctx.fillRect(ROAD_X, y, ROAD_W, 2); }
-    onRoad(120, (x, y, h) => { circ(x, y, 8 + h % 8, "rgba(0,0,0,.18)"); });
-    ctx.fillStyle = "#2de2e6"; ctx.fillRect(ROAD_X - 3, 0, 2, GH); ctx.fillRect(ROAD_X + ROAD_W + 1, 0, 2, GH);
-    lanes("rgba(150,220,255,.4)", "rgba(45,226,230,.5)", 14);
-  },
-  "Golden Skyway"(){
-    ctx.fillStyle = "#7ab8e8"; ctx.fillRect(0, 0, GW, GH);
-    roadside(90, (x, y, h) => { const r = 10 + h % 10; circ(x, y, r, "rgba(255,255,255,.85)"); circ(x + r*.8, y + 3, r*.75, "rgba(255,255,255,.85)"); circ(x - r*.7, y + 4, r*.65, "rgba(255,255,255,.85)"); });
-    ctx.fillStyle = "#c8a040"; ctx.fillRect(ROAD_X - 6, 0, ROAD_W + 12, GH); ctx.fillStyle = "#d8d2c4"; ctx.fillRect(ROAD_X, 0, ROAD_W, GH);
-    { const off = game.scroll % 60; for (let y = -60 + off; y < GH; y += 60){ ctx.fillStyle = "#ffd34d"; ctx.fillRect(ROAD_X - 6, y, 6, 30); ctx.fillRect(ROAD_X + ROAD_W, y, 6, 30); } }
-    lanes("rgba(200,150,30,.7)", "#2f5bd1");
-  },
-  "Gold Rush Road"(){
-    ctx.fillStyle = "#e0b868"; ctx.fillRect(0, 0, GW, GH);
-    roadside(80, (x, y, h) => { if (h % 3 === 0){ ctx.fillStyle = "#4a8a3a"; ctx.fillRect(x - 3, y - 12, 6, 24); ctx.fillRect(x - 9, y - 4, 6, 4); ctx.fillRect(x + 3, y - 2, 6, 4); } else { circ(x, y, 3, "#ffd34d"); circ(x - 1, y - 1, 1.2, "#fff3b0"); } });
-    ctx.fillStyle = "#b8945a"; ctx.fillRect(ROAD_X - 6, 0, ROAD_W + 12, GH); ctx.fillStyle = "#6a5a4a"; ctx.fillRect(ROAD_X, 0, ROAD_W, GH);
-    lanes("rgba(255,240,200,.6)", "#ffd34d");
-  },
+  "Graveyard"(){
+    field("#1e1a2a", "#3a3a32");
+    scatter(56, 3, (x, y, h) => { if (h % 3){ ctx.fillStyle = "#6a6e7a"; ctx.beginPath(); ctx.roundRect(x - 6, y - 9, 12, 15, [6, 6, 0, 0]); ctx.fill(); ctx.fillStyle = "#4a4e5a"; ctx.fillRect(x - 3, y - 4, 6, 1.5); } else { ctx.fillStyle = "#4a3a2a"; ctx.fillRect(x - 1, y - 12, 2, 14); ctx.fillRect(x - 6, y - 8, 12, 2); } });
+    scatter(70, 2, (x, y, h) => { ctx.fillStyle = "rgba(200,190,230,.05)"; ctx.beginPath(); ctx.ellipse(x, y, 40 + h % 30, 12, 0, 0, Math.PI*2); ctx.fill(); }, true);
+    edges(22, (x, y) => { ctx.fillStyle = "#2a2a34"; ctx.fillRect(x - 1.5, y - 5, 3, 9); });
+    ctx.fillStyle = "#2a2a34"; ctx.fillRect(ROAD_X - 4, 0, 2, GH); ctx.fillRect(ROAD_X + ROAD_W + 2, 0, 2, GH); },
+  "Moon Base"(){
+    field("#05040e", "#4a4e5a");
+    scatter(36, 4, (x, y, h) => { ctx.fillStyle = h % 3 ? "rgba(255,255,255,.7)" : "rgba(170,200,255,.8)"; ctx.fillRect(x, y, h % 4 === 0 ? 2 : 1, h % 4 === 0 ? 2 : 1); });
+    scatter(110, 2, (x, y, h) => { const r = 8 + h % 10; circ(x, y, r, "rgba(0,0,0,.18)"); circ(x + 1, y + 1, r - 2, "rgba(255,255,255,.05)"); }, true);
+    ctx.fillStyle = "#2de2e6"; ctx.fillRect(ROAD_X - 3, 0, 2, GH); ctx.fillRect(ROAD_X + ROAD_W + 1, 0, 2, GH); },
+  "Golden Palace"(){
+    field("#7ab8e8", "#e0d4b0");
+    scatter(90, 2, (x, y, h) => { const r = 10 + h % 10; circ(x, y, r, "rgba(255,255,255,.85)"); circ(x + r*.8, y + 3, r*.75, "rgba(255,255,255,.85)"); circ(x - r*.7, y + 4, r*.65, "rgba(255,255,255,.85)"); });
+    { const off = game.scroll % 54; ctx.fillStyle = "rgba(200,150,40,.18)"; for (let y = -54 + off; y < GH; y += 54) ctx.fillRect(ROAD_X, y, ROAD_W, 2); for (let x = ROAD_X + 54; x < ROAD_X + ROAD_W; x += 54) ctx.fillRect(x, 0, 2, GH); }
+    edges(40, (x, y) => { circ(x, y, 5, "#ffd34d"); circ(x - 1, y - 1, 2, "#fff3b0"); });
+    ctx.fillStyle = "#c8a040"; ctx.fillRect(ROAD_X - 4, 0, 2, GH); ctx.fillRect(ROAD_X + ROAD_W + 2, 0, 2, GH); },
+  "Gold Rush Town"(){
+    field("#e0b868", "#c89a5a");
+    scatter(80, 2, (x, y, h) => { if (h % 3 === 0){ ctx.fillStyle = "#4a8a3a"; ctx.fillRect(x - 3, y - 12, 6, 24); ctx.fillRect(x - 9, y - 4, 6, 4); ctx.fillRect(x + 3, y - 2, 6, 4); } else { circ(x, y, 3, "#ffd34d"); circ(x - 1, y - 1, 1.2, "#fff3b0"); } });
+    scatter(70, 2, (x, y) => { circ(x, y, 2, "#ffd34d"); }, true);
+    edges(26, (x, y) => { ctx.fillStyle = "#7a5a34"; ctx.fillRect(x - 2, y - 4, 4, 8); });
+    ctx.fillStyle = "#8a6a3a"; ctx.fillRect(ROAD_X - 4, 0, 2, GH); ctx.fillRect(ROAD_X + ROAD_W + 2, 0, 2, GH); },
 };
-function drawBG(){ const th = themeFor(curCar()); (WORLD_DRAW[th ? th.world : "highway"] || WORLD_DRAW.highway)(); }
+const worldFor = w => WORLDS[(Math.max(1, w) - 1) % WORLDS.length];
+// a new wave fades into the next battlefield over a second and a half
+function drawBG(){
+  const th = themeFor(curCar()); if (th && WORLD_DRAW[th.world]) return WORLD_DRAW[th.world]();
+  const now = worldFor(game.wave);
+  if (game.state === "running" && game.wave > 1 && game.waveT < 1.5){ worldFor(game.wave - 1).draw(); ctx.globalAlpha = game.waveT/1.5; now.draw(); ctx.globalAlpha = 1; }
+  else now.draw();
+}
 
 // a zombie facing you (walking down the road), standing on (0,0)
 function paintZombie(c, z){
