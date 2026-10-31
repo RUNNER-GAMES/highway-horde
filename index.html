@@ -538,7 +538,7 @@ const HERO_LIST = [
 ];
 const CHARS = HERO_LIST.map(([tier, name, skin, hair, hs, shirt, pants, acc, ex, start, bullet], id) => ({id, tier, name, skin, hair, hs, shirt, pants, acc, ex, start: start.split(",").filter(Boolean), bullet, starter: id < 2}));
 const GOLD_ID = CHARS.find(c => c.tier === 6).id;
-const CHESTS = {basic:{name:"Basic Chest", cost:500, w:[51.5, 25, 14, 6.5, 2, 1]}, epic:{name:"Epic Chest", cost:1000, w:[18, 30, 30, 14, 5.5, 2.5]}};
+const CHESTS = {basic:{name:"Basic Chest", cost:500, w:[35, 28, 20, 10, 4.5, 2.5]}, epic:{name:"Epic Chest", cost:1000, w:[0, 15, 38, 28, 12, 7]}};
 const SORTED = [...CHARS].sort((a, b) => a.tier - b.tier || a.id - b.id);
 const DISPLAY_NO = {}; SORTED.forEach((c, i) => DISPLAY_NO[c.id] = i + 1);
 const carNo = c => "#" + String(DISPLAY_NO[c.id]).padStart(3, "0");
