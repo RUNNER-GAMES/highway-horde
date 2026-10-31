@@ -478,9 +478,9 @@ const ABILITIES = {
   fire:   {name:"Flame Trail",    max:5, icon:"fire",   desc:L => "Leave burning ground where you walk"},
   freeze: {name:"Freeze Rounds",  max:3, icon:"freeze", desc:L => "Bullets slow zombies by " + (25 + 15*L) + "%"},
   crit:   {name:"Lucky Shot",     max:4, icon:"crit",   desc:L => (8*L) + "% chance for triple damage"},
-  armor:  {name:"Body Armor",     max:4, icon:"armor",  desc:L => "Take " + (12*L) + "% less damage"},
+  armor:  {name:"Body Armor",     max:4, icon:"armor",  desc:L => "Take " + (10*L) + "% less damage"},
   heart:  {name:"Big Heart",      max:5, icon:"heart",  desc:L => "+25 max health and heal 25"},
-  regen:  {name:"Bandages",       max:4, icon:"regen",  desc:L => "Heal " + (L*.8).toFixed(1) + " health every second"},
+  regen:  {name:"Bandages",       max:4, icon:"regen",  desc:L => "Heal " + (L*.4).toFixed(1) + " health every second"},
   magnet: {name:"Diamond Magnet", max:4, icon:"magnet", desc:L => "Pull in diamonds from " + (50*L) + "% farther"},
   luck:   {name:"Coin Finder",    max:3, icon:"luck",   desc:L => "Zombies drop " + (35*L) + "% more coins"},
 };
@@ -1157,14 +1157,14 @@ const WAVE_LEN = 30;                           // seconds per wave
 const GOLD_CHANCE = 1/25;                      // about 1 run in 25 has a golden zombie
 const SCROLL = 26;                             // how fast the road slides by as you march
 const ZT = {
-  walker: {hp:3,  sp:[34, 46], dmg:8,  pts:1,  xp:1,  r:8,  size:1,    home:22, from:1, w:10},
-  runner: {hp:2,  sp:[88, 104],dmg:8,  pts:2,  xp:1,  r:7.5,size:.95,  home:0,  from:2, w:4},
-  crawler:{hp:2.5,sp:[50, 60], dmg:8,  pts:2,  xp:1,  r:8,  size:1,    home:30, from:3, w:3},
-  brute:  {hp:16, sp:[24, 28], dmg:22, pts:5,  xp:4,  r:13, size:1.6,  home:12, from:4, w:1.2},
-  spitter:{hp:4,  sp:[36, 40], dmg:8,  pts:3,  xp:2,  r:8,  size:1,    home:0,  from:5, w:1.5},
+  walker: {hp:3,  sp:[34, 46], dmg:20, pts:1,  xp:1,  r:8,  size:1,    home:22, from:1, w:10},
+  runner: {hp:2,  sp:[88, 104],dmg:18, pts:2,  xp:1,  r:7.5,size:.95,  home:0,  from:2, w:4},
+  crawler:{hp:2.5,sp:[50, 60], dmg:18, pts:2,  xp:1,  r:8,  size:1,    home:30, from:3, w:3},
+  brute:  {hp:16, sp:[24, 28], dmg:45, pts:5,  xp:4,  r:13, size:1.6,  home:12, from:4, w:1.2},
+  spitter:{hp:4,  sp:[36, 40], dmg:18, pts:3,  xp:2,  r:8,  size:1,    home:0,  from:5, w:1.5},
   boomer: {hp:5,  sp:[30, 34], dmg:6,  pts:3,  xp:2,  r:10, size:1.15, home:18, from:6, w:1.5},
-  boss:   {hp:90, sp:[17, 17], dmg:25, pts:50, xp:20, r:24, size:2.7,  home:10, from:99, w:0},
-  golden: {hp:25, sp:[50, 50], dmg:10, pts:25, xp:10, r:8,  size:1.05, home:0,  from:99, w:0},
+  boss:   {hp:90, sp:[17, 17], dmg:60, pts:50, xp:20, r:24, size:2.7,  home:10, from:99, w:0},
+  golden: {hp:25, sp:[50, 50], dmg:20, pts:25, xp:10, r:8,  size:1.05, home:0,  from:99, w:0},
 };
 const xpNeed = L => Math.round(5 + L*3.2 + L*L*.35);
 const game = {state:"ready", t:0, scroll:0, px:0, tx:0, py:0, ty:0, vx:0, vy:0, walk:0, zs:[], bullets:[], gems:[], drops:[], parts:[], trail:[], fx:[], texts:[], goo:[], flames:[], ab:{}, banner:null, paused:false};
@@ -1199,7 +1199,7 @@ function endRun(){
 function addCoins(n){ game.runCoins += n; if (!TEST.on){ state.coins += n; state.lifetimeCoins += n; renderHUD(); } }
 const lv = k => game.ab[k] || 0;
 const waveHp = () => 1 + (game.wave - 1)*.22;
-const waveSp = () => Math.min(1.6, 1 + (game.wave - 1)*.035);
+const waveSp = () => Math.min(1.7, 1 + (game.wave - 1)*.05);
 const dmgMult = () => 1 + .3*lv("power");
 const magnetR = () => 38*(1 + .5*lv("magnet"));
 
@@ -1222,7 +1222,7 @@ function pickType(){
 function spawnTick(dt){
   game.spawnT -= dt;
   if (game.spawnT <= 0){
-    game.spawnT = Math.max(.17, 1.2 - (game.wave - 1)*.085)*(.75 + Math.random()*.5)*(game.bossOn ? 1.6 : 1);
+    game.spawnT = Math.max(.15, 1.0 - (game.wave - 1)*.085)*(.75 + Math.random()*.5)*(game.bossOn ? 1.6 : 1);
     const t = pickType(); spawnZ(t, ROAD_X + 14 + Math.random()*(ROAD_W - 28), -20);
   }
   // hordes: a big tight pack shambling down one stretch of road. Get out of the way, or mow them down.
@@ -1260,11 +1260,11 @@ function killZ(z){
   // diamonds
   const v = T.xp; if (v >= 20) game.gems.push({x:z.x, y:z.y, v, k:2}); else if (v >= 4) game.gems.push({x:z.x, y:z.y, v, k:1}); else for (let i = 0; i < v; i++) game.gems.push({x:z.x + (i ? (Math.random() - .5)*10 : 0), y:z.y, v:1, k:0});
   // coins and first aid
-  const coinP = .085*(1 + .35*lv("luck"));
+  const coinP = .14*(1 + .35*lv("luck"));
   if (z.type === "boss"){ for (let i = 0; i < 15; i++) game.drops.push({k:"coin", x:z.x + (Math.random() - .5)*50, y:z.y + (Math.random() - .5)*30, spin:i}); game.drops.push({k:"aid", x:z.x, y:z.y + 20}); game.bossOn = game.zs.some(o => o !== z && o.type === "boss" && !o.dead); game.banner = {text:"TANK DOWN!", sub:"+15 coins", t:1.8}; Sound.boom(); }
   else if (Math.random() < coinP) game.drops.push({k:"coin", x:z.x, y:z.y, spin:0});
-  else if (Math.random() < .012) game.drops.push({k:"aid", x:z.x, y:z.y});
-  if (z.type === "boomer") boom(z.x, z.y - 8, 46, 6, 15, "#a8e04a");
+  else if (Math.random() < .004) game.drops.push({k:"aid", x:z.x, y:z.y});
+  if (z.type === "boomer") boom(z.x, z.y - 8, 50, 6, 35, "#a8e04a");
   if (z.type === "golden") catchGold(z);
   Sound.kill();
 }
@@ -1285,8 +1285,8 @@ function catchGold(z){
 }
 function hurtHero(d){
   if (game.inv > 0 || game.state !== "running") return;
-  d *= 1 - .12*lv("armor");
-  game.hp -= d; game.inv = .7; game.hurtT = .45; Sound.hurt();
+  d *= 1 - .1*lv("armor");
+  game.hp -= d; game.inv = .35; game.hurtT = .45; Sound.hurt();
   game.texts.push({txt:"-" + Math.round(d), x:game.px, y:game.py - 34, t:0, col:"#ff6a5a"});
   if (game.hp <= 0){ game.hp = 0; for (let i = 0; i < 20; i++) game.parts.push({x:game.px, y:game.py - 11*HS, vx:(Math.random() - .5)*200, vy:-Math.random()*200, life:.7, col: i % 2 ? curCar().shirt : "#7ac85a"}); endRun(); }
 }
@@ -1350,14 +1350,14 @@ function checkLevel(){
 function choose(i){
   if (game.state !== "pick" || game.pickT < .45 || !game.choices[i]) return;
   const k = game.choices[i];
-  if (k === "medkit") game.hp = Math.min(game.maxHp, game.hp + 40);
+  if (k === "medkit") game.hp = Math.min(game.maxHp, game.hp + 25);
   else if (k === "cash") addCoins(10);
   else { game.ab[k] = lv(k) + 1; if (k === "heart"){ game.maxHp += 25; game.hp = Math.min(game.maxHp, game.hp + 25); } }
   game.choices = null; game.state = "running"; Sound.pick();
-  game.texts.push({txt: k === "medkit" ? "+40 health" : k === "cash" ? "+10 coins" : ABILITIES[k].name + (lv(k) > 1 ? " " + lv(k) : "") + "!", x:game.px, y:game.py - 44, t:0, col:"#7dffe0"});
+  game.texts.push({txt: k === "medkit" ? "+25 health" : k === "cash" ? "+10 coins" : ABILITIES[k].name + (lv(k) > 1 ? " " + lv(k) : "") + "!", x:game.px, y:game.py - 44, t:0, col:"#7dffe0"});
   checkLevel();
 }
-const CHOICE_INFO = k => k === "medkit" ? {name:"First Aid", desc:"Heal 40 health", lvl:0, max:0, icon:"medkit"} : k === "cash" ? {name:"Pocket Change", desc:"+10 coins", lvl:0, max:0, icon:"cash"}
+const CHOICE_INFO = k => k === "medkit" ? {name:"First Aid", desc:"Heal 25 health", lvl:0, max:0, icon:"medkit"} : k === "cash" ? {name:"Pocket Change", desc:"+10 coins", lvl:0, max:0, icon:"cash"}
   : {name: ABILITIES[k].name, desc: ABILITIES[k].desc(lv(k) + 1), lvl: lv(k) + 1, max: ABILITIES[k].max, icon: ABILITIES[k].icon, isNew: !lv(k)};
 function cardRects(){
   const w = Math.min(GW - 32, 340), h = 78, gap = 12, x = Math.round(GW/2 - w/2), y0 = Math.round(GH*.5 - (3*h + 2*gap)/2 + 20);
@@ -1381,7 +1381,7 @@ function update(dt){
   game.rt += dt; game.waveT += dt;
   if (game.waveT >= WAVE_LEN) nextWave();
   game.inv = Math.max(0, game.inv - dt); game.hurtT = Math.max(0, game.hurtT - dt);
-  if (lv("regen")) game.hp = Math.min(game.maxHp, game.hp + .8*lv("regen")*dt);
+  if (lv("regen")) game.hp = Math.min(game.maxHp, game.hp + .4*lv("regen")*dt);
   // movement: the hero chases where you point
   const lo = ROAD_X + 12, hi = ROAD_X + ROAD_W - 12, top = 84, bot = GH - 18;
   if (keys.L) game.tx -= 420*dt; if (keys.R) game.tx += 420*dt; if (keys.U) game.ty -= 420*dt; if (keys.D) game.ty += 420*dt;
@@ -1425,7 +1425,7 @@ function update(dt){
     z.ph += dt*(z.sp*.12 + 2)*slowK;
     if (z.stun > 0) z.stun -= dt;
     else if (z.type === "spitter" && z.y >= z.stopY && z.spits < 3){
-      z.spitT -= dt; if (z.spitT <= 0){ z.spitT = 2.2; z.spits++; game.goo.push({x:z.x, y:z.y - 6, vy:170}); Sound.spit(); }
+      z.spitT -= dt; if (z.spitT <= 0){ z.spitT = 2.2; z.spits++; game.goo.push({x:z.x, y:z.y - 6, vy:210}); Sound.spit(); }
     } else {
       let vx = 0;
       if (z.type === "golden"){ z.swT -= dt; if (z.swT <= 0){ z.swT = .9 + Math.random()*.8; z.tl = Math.max(0, Math.min(LANES - 1, z.tl + (Math.random() < .5 ? -1 : 1))); } vx = Math.sign(laneX(z.tl) - z.x)*Math.min(Math.abs(laneX(z.tl) - z.x)/dt, 110); }
@@ -1440,7 +1440,7 @@ function update(dt){
     // touching the hero
     if (!z.dead && Math.abs(z.x - game.px) < z.r + 5*HS && Math.abs((z.y - 8*z.size) - (game.py - 11*HS)) < z.r + 8*HS){
       if (z.type === "boomer"){ z.hp = 0; killZ(z); }
-      else { hurtHero(z.dmg); z.stun = .3; z.y -= 22/Math.max(1, z.size); if (game.state !== "running") return; }
+      else { hurtHero(z.dmg); z.stun = .15; z.y -= 6/Math.max(1, z.size); if (game.state !== "running") return; }
     }
   }
   // keep zombies from stacking into one blob
@@ -1449,7 +1449,7 @@ function update(dt){
       if (dx*dx + dy*dy < min*min){ const d = Math.max(.01, Math.hypot(dx, dy)), push = (min - d)*.5, ux = dx/d, uy = dy/d, wa = b.size/(a.size + b.size), wb = 1 - wa; a.x -= ux*push*wa; a.y -= uy*push*wa*.5; b.x += ux*push*wb; b.y += uy*push*wb*.5; } } }
   game.zs = zs.filter(z => { if (z.dead) return false; if (z.y - 30*z.size > GH){ if (z.type === "golden") game.banner = {text:"It got away…", sub:"Maybe next time", t:1.6}; if (z.type === "boss") game.bossOn = game.zs.some(o => o !== z && o.type === "boss" && !o.dead); return false; } return true; });
   // spit
-  for (const g of game.goo){ g.y += g.vy*dt; if (Math.abs(g.x - game.px) < 6*HS + 4 && Math.abs(g.y - (game.py - 11*HS)) < 10*HS){ g.gone = true; hurtHero(8); } }
+  for (const g of game.goo){ g.y += g.vy*dt; if (Math.abs(g.x - game.px) < 6*HS + 4 && Math.abs(g.y - (game.py - 11*HS)) < 10*HS){ g.gone = true; hurtHero(20); } }
   game.goo = game.goo.filter(g => !g.gone && g.y < GH + 10);
   if (game.state !== "running") return;
   // diamonds, coins and first aid
@@ -1613,7 +1613,7 @@ function drawZombie(z){
 function drawHero(){
   const c = curCar();
   ctx.save(); ctx.translate(Math.round(game.px), Math.round(game.py));
-  if (game.inv > 0){ ctx.strokeStyle = `rgba(255,255,255,${(game.inv/.7)*.5})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(0, -11*HS, 9*HS, 13*HS, 0, 0, Math.PI*2); ctx.stroke(); }
+  if (game.inv > 0){ ctx.strokeStyle = `rgba(255,255,255,${(game.inv/.35)*.5})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(0, -11*HS, 9*HS, 13*HS, 0, 0, Math.PI*2); ctx.stroke(); }
   if (game.state === "over") ctx.rotate(.5);
   ctx.scale(HS, HS); paintHero(ctx, c, "back", game.walk, {}); ctx.restore();
 }
